@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  web:
+    build: ./backend/core
+    command: python3 manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend/core/:/usr/src/app/
+    ports:
+      - 8000:8000
+    depends_on: 
+      - redis
+  redis:
+    image: redis
+  celery:
+    build: ./backend/core
+    command: celery -A core worker -l INFO
+    volumes:
+      - ./backend/core/:/usr/src/app
+    depends_on:
+      - redis
+  celery_beat:
+    build: ./backend/core
+    command: celery -A core beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - ./backend/core/:/usr/src/app
+    depends_on:
+      - redis
