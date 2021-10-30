@@ -39,7 +39,7 @@ class CompanyUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
 # TODO : 
 #   Add JWT
-#   Add Swagger
+#   Add Swagger  ----->done
 #   Add Buy Sell Views (Priority q)
 
 
