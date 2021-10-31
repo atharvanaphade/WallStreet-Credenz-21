@@ -63,7 +63,7 @@ class BuyView(generics.GenericAPIView):
         ret_dict['status'] = 'MKT_CLOSED'
         return Response(ret_dict, status=200)
     
-    def sell(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         global_obj = Globals.objects.get(pk=1)
         ret_dict = {}
         if global_obj.market_on:
