@@ -17,8 +17,7 @@ urlpatterns = [
     path('news/<int:pk>', NewsUpdateDestroyData.as_view(), name="edit-news"),
     path('company', CompanyCreateListView.as_view(), name="company"),
     path('company/<int:pk>', CompanyUpdateDestroyView.as_view(), name="edit-company"),
-<<<<<<< HEAD
-=======
+    path('buy/', BuyView.as_view(), name='buy-view'),
     path('get_token/', TokenObtainPairView.as_view(), name='get-token'),
     path('get_refresh/', TokenRefreshView.as_view(), name='get-refresh'),
 ]
@@ -40,5 +39,4 @@ schema_view = get_schema_view(
 urlpatterns += [
    path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
->>>>>>> 841fca89cc6802909a5c19e4022f1d9fb57b717f
 ]

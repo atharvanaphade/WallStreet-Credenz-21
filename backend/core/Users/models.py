@@ -3,6 +3,12 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+class Globals(models.Model):
+    sensex = models.FloatField(default=0)
+    spread = models.IntegerField(default=0)
+    bid_range = models.FloatField(default=0)
+    market_on = models.BooleanField(default=True)
+
 class Profile(models.Model):
     user_id = models.OneToOneField(User, on_delete=models.CASCADE)
     rank = models.IntegerField(default=-1)
