@@ -38,7 +38,7 @@ class CompanyUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAdminUser, )
 
 # TODO : 
-#   Add JWT
+#   Add JWT --> Done
 #   Add Swagger  ----->done
 #   Add Buy Sell Views (Priority q)
 
