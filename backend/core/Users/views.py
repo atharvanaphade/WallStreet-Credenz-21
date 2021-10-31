@@ -4,6 +4,8 @@ from .serializers import *
 from rest_framework import mixins, generics
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from django.contrib.auth.models import User
+# add this permission to allow signle sign in from one user  
+from .permissions import IsPrivateAllowed
 
 # Create your views here.
 class CreateAccountView(generics.ListCreateAPIView):
@@ -41,8 +43,6 @@ class CompanyUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 #   Add JWT
 #   Add Swagger  ----->done
 #   Add Buy Sell Views (Priority q)
-
-
 
 
 
