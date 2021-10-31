@@ -11,7 +11,6 @@ class CreateAccountView(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = AccountSerializer
     permission_classes = (AllowAny, )
-    
 
 class UpdateDestroyAccount(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
