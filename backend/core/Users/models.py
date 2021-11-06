@@ -27,7 +27,7 @@ class Company(models.Model):
     remaining_no_of_shares = models.IntegerField(default=0)
     
     def __str__(self) -> str:
-        return self.company_name + '_' + self.share_price
+        return self.company_name + '_' + str(self.share_price)
 
 class News(models.Model):
     news_title = models.TextField(max_length=300, default="NA")
@@ -50,13 +50,13 @@ class UserHistory(models.Model):
 
 class CompanyBuyTable(models.Model):
     user_fk = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    compnay_fk = models.ForeignKey(Company, on_delete=models.CASCADE)
+    company_fk = models.ForeignKey(Company, on_delete=models.CASCADE)
     no_of_shares = models.IntegerField(default=0)
     bid_price = models.IntegerField(default=0)
     transaction_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return self.user_fk.username + '_' + self.compnay_fk.company_name + '_BuyRow'
+        return self.user_fk.user_id.username + '_' + self.company_fk.company_name + '_BuyRow'
 
 class CompanySellTable(models.Model):
     user_fk = models.ForeignKey(Profile, on_delete=models.CASCADE)
@@ -66,7 +66,7 @@ class CompanySellTable(models.Model):
     transaction_time = models.DateTimeField(auto_now_add=True)
     
     def __str__(self) -> str:
-        return self.user_fk.username + '_' + self.compnay_fk.company_name + '_SellRow'
+        return self.user_fk.user_id.username + '_' + self.compnay_fk.company_name + '_SellRow'
 
 
 class UserShare(models.Model):

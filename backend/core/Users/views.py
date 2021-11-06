@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from rest_framework import permissions
-from .serializers import *
 from rest_framework import mixins, generics
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from django.contrib.auth.models import User
 from rest_framework.response import Response
+from .serializers import *
+from .utils import *
 
 # Create your views here.
 class CreateAccountView(generics.ListCreateAPIView):
@@ -43,7 +44,7 @@ class BuyView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated, )
     
     def get(self, request, *args, **kwargs):
-        global_obj = Globals.objects.get(pk=1)
+        global_obj = Globals.objects.all().first()
         ret_dict = {}
         if global_obj.market_on:
             companies = Company.objects.all()
@@ -63,25 +64,25 @@ class BuyView(generics.GenericAPIView):
         return Response(ret_dict, status=200)
     
     def post(self, request, *args, **kwargs):
-        global_obj = Globals.objects.get(pk=1)
+        global_obj = Globals.objects.all().first()
         ret_dict = {}
         if global_obj.market_on:
             try:
-                copmany_name = request.data['company_name']
+                company_name = request.data['company_name']
                 bid_shares = request.data['bid_shares']
                 bid_price = request.data['bid_price']
-
-                # TODO :
-
-                # create functions for all below !!
-
-                # check if user has money, company has shares, and if bid is valid
-
-                # if valid remove money from user profile
-
-                # add object to buy table
-            except:
-                ret_dict['status'] = 'INVALID_DATA'
+                company_obj = Company.objects.filter(company_name=company_name).first()
+                if (checkUserhasMoney(request.user, bid_price) and 
+                checkForCompanyShares(company_obj, bid_shares) and 
+                checkIsBidValid(bid_price, company_obj)):
+                    addObjectToBuyTable(request.user, company_obj,
+                    bid_shares, bid_price)
+                    alterMoney(request.user, bid_price, bid_shares)
+                    # TODO: check against sell table
+                    ret_dict['status'] = 'Bid Placed!'
+                    return Response(ret_dict, status=201)
+            except Exception as e:
+                ret_dict['status'] = f'{e}'
                 return Response(ret_dict, status=200)
         ret_dict['status'] = 'MKT_CLOSED'
         return Response(ret_dict, status=200)
@@ -89,7 +90,9 @@ class BuyView(generics.GenericAPIView):
 # TODO : 
 #   Add JWT --> Done
 #   Add Swagger  ----->done
-#   Add Buy Sell Views (Priority q)
+#   Add Buy View (Priority q) --> Done
+#   Add Sell View
+#   Add News Tasks
 
 
 
