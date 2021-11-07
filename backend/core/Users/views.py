@@ -86,17 +86,4 @@ class BuyView(generics.GenericAPIView):
                 return Response(ret_dict, status=200)
         ret_dict['status'] = 'MKT_CLOSED'
         return Response(ret_dict, status=200)
-
-# TODO : 
-#   Add JWT --> Done
-#   Add Swagger  ----->done
-#   Add Buy View (Priority q) --> Done
-#   Add Sell View
-#   Add News Tasks
-
-
-
-
-
-
-
+        
