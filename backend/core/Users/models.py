@@ -8,6 +8,8 @@ class Globals(models.Model):
     spread = models.IntegerField(default=0)
     bid_range = models.FloatField(default=0)
     market_on = models.BooleanField(default=True)
+    start_news = models.BooleanField(default=True)
+    news_counter = models.IntegerField(default=0)
 
 class Profile(models.Model):
     user_id = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -66,7 +68,7 @@ class CompanySellTable(models.Model):
     transaction_time = models.DateTimeField(auto_now_add=True)
     
     def __str__(self) -> str:
-        return self.user_fk.user_id.username + '_' + self.compnay_fk.company_name + '_SellRow'
+        return self.user_fk.user_id.username + '_' + self.company_fk.company_name + '_SellRow'
 
 
 class UserShare(models.Model):
@@ -75,5 +77,5 @@ class UserShare(models.Model):
     no_of_shares = models.IntegerField(default=0)
 
     def __str__(self) -> str:
-        return f'{self.user_fk.username}_{self.company_fk.company_name}_UserShare_{self.no_of_shares}'
+        return f'{self.user_fk.user_id.username}_{self.company_fk.company_name}_UserShare_{self.no_of_shares}'
     

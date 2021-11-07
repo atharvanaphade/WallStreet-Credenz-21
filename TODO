@@ -2,8 +2,12 @@ TODO :
     Add JWT --> Done
     Add Swagger  ----->done
     Add Buy View (Priority q) --> Done
-    Add Sell View (views)
-    Add News Task (tasks)
-    Add Spread Task (tasks)
-    User -> Company tranaction utility (utils)
-    User -> User transaction utility (utils)
+    Add Sell View (views) --> Done
+    Add News Task (tasks)  --> Done
+    Add Spread Task (tasks)  --> Done
+    User -> Company tranaction utility (utils) --> Done
+    User -> User transaction utility (utils)   --> Done
+    Buy and Sell serializer, queryset  --> Done
+    Sell Post me Matching after sell request
+    Get user stats View
+    Add Filter to company  sell and buy table as user/ company

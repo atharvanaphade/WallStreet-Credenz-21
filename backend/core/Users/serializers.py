@@ -36,13 +36,28 @@ class SecureProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class CompanySerializer(serializers.ModelSerializer):
+
+    bid_shares = serializers.IntegerField(default=0)
+    bid_price = serializers.IntegerField(default=0)
+    company_name = serializers.CharField(default='')
+
     class Meta:
         model = Company
-        fields = "__all__"
+        exclude = ["remaining_no_of_shares","total_no_shares", "share_price", "short_name"]
+        # fields = "__all__"
 
 
 class NewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = News
         fields = "__all__"
-        
+
+class SellViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserShare
+        fields = ["company_name", "short_name", "share_price", "remaining_no_of_shares"]
+
+class GetAllNewsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = News
+        fields = ["news_title", "description"]

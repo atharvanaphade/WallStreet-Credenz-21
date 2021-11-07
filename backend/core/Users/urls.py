@@ -15,9 +15,11 @@ urlpatterns = [
     path('edit_profile/<int:pk>', UpdateDestroyAccount.as_view(), name='edit-account'),
     path('news_create/', NewsCreateListData.as_view(), name='create-news'),
     path('news/<int:pk>', NewsUpdateDestroyData.as_view(), name="edit-news"),
+    path('all_news/', GetAllNewsView.as_view(), name="get-news"),
     path('company', CompanyCreateListView.as_view(), name="company"),
     path('company/<int:pk>', CompanyUpdateDestroyView.as_view(), name="edit-company"),
     path('buy/', BuyView.as_view(), name='buy-view'),
+    path('sell/', SellView.as_view(), name='sell-view'),
     path('get_token/', TokenObtainPairView.as_view(), name='get-token'),
     path('get_refresh/', TokenRefreshView.as_view(), name='get-refresh'),
 ]
