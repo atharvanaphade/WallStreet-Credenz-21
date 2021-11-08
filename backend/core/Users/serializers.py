@@ -61,3 +61,11 @@ class GetAllNewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = News
         fields = ["news_title", "description"]
+
+class UserStatsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        exclude = ["user_id", "rank"]
+        extra_kwargs = {
+            "user_company_shares" : {"required": True, "read_only": False}
+        }

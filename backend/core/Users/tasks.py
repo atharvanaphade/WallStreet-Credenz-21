@@ -3,7 +3,7 @@ from celery.utils.log import get_task_logger
 import pandas as pd
 from .models import *
 
-news = pd.read_csv('news.csv')
+# news = pd.read_csv('news.csv')
 
 logger = get_task_logger(__name__)
 
@@ -13,21 +13,21 @@ def send_notifiction():
 
 
 
-@shared_task()
-def add_news():
-    g_obj = Globals.objects.all().first()
-    if g_obj.market_on and g_obj.start_news:
-        global news
-        new_news = news.iloc[g_obj.NewsCounter, :]
-        title = new_news.title
-        g_obj.LiveText = new_news.title
-        description = new_news.description
-        g_obj.NewsCounter += 1
-        g_obj.save()
+# @shared_task()
+# def add_news():
+#     g_obj = Globals.objects.all().first()
+#     if g_obj.market_on and g_obj.start_news:
+#         global news
+#         new_news = news.iloc[g_obj.NewsCounter, :]
+#         title = new_news.title
+#         g_obj.LiveText = new_news.title
+#         description = new_news.description
+#         g_obj.NewsCounter += 1
+#         g_obj.save()
             
-        News.objects.create(title=title, description=description)
-    else:
-        return
+#         News.objects.create(title=title, description=description)
+#     else:
+#         return
 
 
 @shared_task()
@@ -54,3 +54,19 @@ def spread_task():
     g_obj.spred = 0
     g_obj.save()
 
+@shared_task
+def match_util(company, user, user_history, no_of_shares, buy_or_sell):
+
+    # Get buy and sell table objects in sorted order.
+    buy_objects = CompanyBuyTable.objects.all().order_by('-bid_price', 'transaction_time')
+    sell_objects = CompanySellTable.objects.all().order_by('bid_price', 'transaction_time')
+
+    # If buy objects exists.
+    if buy_objects is not None:
+        buy_pointer = 0   # Iterator counter for buy objects.
+        sell_pointer = 0  # Iterator counter for sell objects.
+
+    pass  
+    #     while 
+    #     pass
+    # pass

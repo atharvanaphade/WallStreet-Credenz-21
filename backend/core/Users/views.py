@@ -171,3 +171,37 @@ class SellView(generics.GenericAPIView):
                 return Response(ret_dict, status=200)
         ret_dict['status'] = 'MKT_CLOSED'
         return Response(ret_dict, status=200)
+
+
+class GetUserStatsView(generics.ListCreateAPIView):
+    serializer_class = UserStatsSerializer
+    queryset = Profile.objects.all()
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request, *args, **kwargs):
+        query_dict = {}
+        try:
+            user_share_qs = UserShare.objects.filter(user_fk=Profile.objects.filter(user_id=request.user).first())
+            user = Profile.objects.filter(user_id=request.user).first()
+            query_dict["no_of_shares"] = user.no_of_shares
+            query_dict["cash"] = user.cash
+            query_dict["net_worth"] = user.net_worth
+            query_dict["company_user_share_list"] = []
+            for user_share in user_share_qs:
+                temp_dict = {}
+                company = user_share.company_fk
+                temp_dict = {"company_user_share_list":company.company_name,
+                "no_of_shares": company.no_of_shares
+                }
+                query_dict["company_user_share_list"].append(temp_dict)
+            query_dict["status"] = "Successfully fetched user data..!!"        
+            return Response(query_dict, status=200)
+        except Exception as e:
+            query_dict["status"] = f"not working error found = {e}"
+            return Response(query_dict, status=404)
+    
+    # rank
+    # vauational
+    # cash holding 
+    # share holding
+    # purn proofile 
