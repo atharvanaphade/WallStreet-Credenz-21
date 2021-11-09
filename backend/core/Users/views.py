@@ -1,10 +1,10 @@
 from django.shortcuts import render
-from rest_framework import permissions
-from rest_framework import mixins, generics
+from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from django.contrib.auth.models import User
 from rest_framework.response import Response
 from .serializers import *
+from .tasks import match_util
 from .utils import *
 
 # Create your views here.
@@ -83,19 +83,16 @@ class BuyView(generics.GenericAPIView):
                     addObjectToBuyTable(request.user, company_obj,
                     int(bid_shares), int(bid_price))
                     alterMoney(request.user, int(bid_price), int(bid_shares))
-                    # TODO: match utilities
+                    # TODO: match utilities testing
+                    match_util.delay(company_obj.pk)
                     ret_dict['status'] = 'Bid Placed!'
                     return Response(ret_dict, status=201)
-                
             except Exception as e:
                 ret_dict['status'] = f'error is {e}'
                 return Response(ret_dict, status=200)
         ret_dict['status'] = 'MKT_CLOSED'
         return Response(ret_dict, status=200)
         
-
-
-
 class SellView(generics.GenericAPIView):
     serializer_class = CompanySerializer
     permission_classes = (IsAuthenticated, )
@@ -157,7 +154,8 @@ class SellView(generics.GenericAPIView):
                         bid_price = bid_price
                         )      
 
-                    # Todo matching utility
+                    # TODO: matching utility testing
+                    match_util.delay(com_obj.pk)
 
                     ret_dict['status'] = 'Valid Bid'
                     return Response(ret_dict, status=200)

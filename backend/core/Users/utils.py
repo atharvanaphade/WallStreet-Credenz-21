@@ -17,9 +17,9 @@ def alterMoney(user, money, no_of_shares) -> None:
     profile.save()
 
 def alterSellMoney(user, money, no_of_shares) -> None:
-    profile = Profile.objects.filter(user_fk=user).first()
-    profile.cash += money * no_of_shares
-    profile.save()
+    # profile = Profile.objects.filter(user_fk=user).first()
+    user.cash += money * no_of_shares
+    user.save()
     
 def checkIsBidValid(bid_price, company) -> bool:
     global_obj = Globals.objects.all().first()
@@ -73,7 +73,7 @@ def userCompanyTransaction(company, buy_obj) -> int:
             bid_price = buy_obj.bid_price,
             buy_or_sell = True,
         )
-        company.remaining_no_of_shares -= buy_obj.bid_shares
+        company.remaining_no_of_shares -= buy_obj.no_of_shares
         company.save()
         CompanyBuyTable.objects.all().filter(pk=buy_obj.pk).first().delete()
         return 0
@@ -97,41 +97,41 @@ def userTransaction(company, buy_obj, sell_obj) -> int:
     
     # Update spread
     global_obj = Globals.objects.all().first()
-    global_obj.spread -= ((buy_obj.bid_price - sell_obj.bid_price) * min(buy_obj.bid_shares, sell_obj.bid_shares))
+    global_obj.spread -= ((buy_obj.bid_price - sell_obj.bid_price) * min(buy_obj.no_of_shares, sell_obj.no_of_shares))
     global_obj.save()
 
     # Update company share price
     company.share_price -= sell_obj.bid_price
     company.save()
 
-    buy_user = Profile.objects.all().filter(pk=buy_obj.user_fk).first()   # Selling bid user
-    sell_user = Profile.objects.all().filter(pk=sell_obj.user_fk).first() # Buying bid user
+    buy_user = Profile.objects.all().filter(pk=buy_obj.user_fk.pk).first()   # Selling bid user
+    sell_user = Profile.objects.all().filter(pk=sell_obj.user_fk.pk).first() # Buying bid user
 
     # Check if buying user has shares of given company.
     user_share = UserShare.objects.all().filter(user_fk=buy_user.pk).first()
     if user_share is not None: # User has shares.
-        user_share.no_of_shares += min(buy_obj.bid_shares, sell_obj.bid_shares)
+        user_share.no_of_shares += min(buy_obj.no_of_shares, sell_obj.no_of_shares)
         user_share.save()
     if user_share is None: # User does not have shares.
         UserShare.objects.create(
             user_fk = buy_user,
             company_fk = company,
-            no_of_shares = min(buy_obj.bid_shares, sell_obj.bid_shares)
+            no_of_shares = min(buy_obj.no_of_shares, sell_obj.no_of_shares)
         )
     
-    if buy_obj.bid_shares == sell_obj.bid_shares: # If buying and selling bid are equal match bid and create user history
+    if buy_obj.no_of_shares == sell_obj.no_of_shares: # If buying and selling bid are equal match bid and create user history
         # Create user history
         UserHistory.objects.create(
             user_fk = buy_user,
             company_fk = company,
-            no_of_shares = buy_obj.bid_shares,
+            no_of_shares = buy_obj.no_of_shares,
             bid_price = buy_obj.bid_price,
             buy_or_sell = True
         )
         UserHistory.objects.create(
             user_fk = sell_user,
             company_fk = company,
-            no_of_shares = sell_obj.bid_shares,
+            no_of_shares = sell_obj.no_of_shares,
             bid_price = sell_obj.bid_price,
             buy_or_sell = False
         )
@@ -142,23 +142,23 @@ def userTransaction(company, buy_obj, sell_obj) -> int:
         alterSellMoney(sell_user, sell_obj.bid_price, sell_obj.no_of_shares)
         return 0
 
-    elif buy_obj.bid_shares > sell_obj.bid_shares: # If buying bid has more number of shares.
+    elif buy_obj.no_of_shares > sell_obj.no_of_shares: # If buying bid has more number of shares.
         # Update sell table entry
-        buy_obj.bid_shares -= sell_obj.bid_shares
+        buy_obj.no_of_shares -= sell_obj.no_of_shares
         buy_obj.save()
 
         # Create user history
         UserHistory.objects.create(
             user_fk = buy_user,
             company_fk = company,
-            no_of_shares = buy_obj.bid_shares,
+            no_of_shares = buy_obj.no_of_shares,
             bid_price = buy_obj.bid_price,
             buy_or_sell = True
         )
         UserHistory.objects.create(
             user_fk = sell_user,
             company_fk = company,
-            no_of_shares = sell_obj.bid_shares,
+            no_of_shares = sell_obj.no_of_shares,
             bid_price = sell_obj.bid_price,
             buy_or_sell = False
         )
@@ -176,14 +176,14 @@ def userTransaction(company, buy_obj, sell_obj) -> int:
     UserHistory.objects.create(
         user_fk = buy_user,
         company_fk = company,
-        no_of_shares = buy_obj.bid_shares,
+        no_of_shares = buy_obj.no_of_shares,
         bid_price = buy_obj.bid_price,
         buy_or_sell = True
     )
     UserHistory.objects.create(
         user_fk = sell_user,
         company_fk = company,
-        no_of_shares = sell_obj.bid_shares,
+        no_of_shares = sell_obj.no_of_shares,
         bid_price = sell_obj.bid_price,
         buy_or_sell = False
     )

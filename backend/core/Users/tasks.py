@@ -2,6 +2,7 @@ from celery import shared_task
 from celery.utils.log import get_task_logger
 import pandas as pd
 from .models import *
+from .utils import *
 
 # news = pd.read_csv('news.csv')
 
@@ -55,7 +56,8 @@ def spread_task():
     g_obj.save()
 
 @shared_task
-def match_util(company, user, user_history, no_of_shares, buy_or_sell):
+def match_util(company_id):
+    company = Company.objects.all().filter(pk=company_id).first()
 
     # Get buy and sell table objects in sorted order.
     buy_objects = CompanyBuyTable.objects.all().order_by('-bid_price', 'transaction_time')
@@ -66,7 +68,29 @@ def match_util(company, user, user_history, no_of_shares, buy_or_sell):
         buy_pointer = 0   # Iterator counter for buy objects.
         sell_pointer = 0  # Iterator counter for sell objects.
 
-    pass  
-    #     while 
-    #     pass
-    # pass
+        while (buy_pointer < len(buy_objects)) and (sell_pointer < len(sell_objects) or company.remaining_no_of_shares):
+            # Match buy tabl entries till request gets completed
+            
+            if company.remaining_no_of_shares:
+                # Company has shares remaining
+                
+                if not (sell_pointer < len(sell_objects)):
+                    if buy_objects[buy_pointer].bid_price >= company.share_price:
+                        fl = userCompanyTransaction(company, buy_objects[buy_pointer])
+                        buy_pointer += (fl == 0)
+                        continue
+                # If company.share_price is lesser than sell_object price sell shares of the company.
+                elif (sell_pointer < len(sell_objects)) and company.share_price < sell_objects[sell_pointer].bid_price and buy_objects[buy_pointer] >= company.share_price:
+                    
+                    # Match buy bid to company.
+                    fl = userCompanyTransaction(company, buy_objects[buy_pointer])
+                    buy_pointer += (fl == 0) # Buy counter will be updated only if entry is deleted.
+                    continue
+            
+            if (sell_pointer < len(sell_objects)) and sell_objects and buy_objects[buy_pointer].bid_price >= sell_objects[sell_pointer].bid_price:
+                # Bid matched from buy table to sell table.
+                fl = userTransaction(company, buy_objects[buy_pointer], sell_objects[sell_pointer])
+                buy_pointer += (fl == -1 or fl == 0)
+                sell_pointer += (fl == 1 or fl == 0)
+            else:
+                break
