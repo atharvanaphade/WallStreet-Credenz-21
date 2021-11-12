@@ -48,7 +48,7 @@ class UserHistory(models.Model):
     transaction_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return self.user_fk.username + '_' + self.company_fk.company_name + '_' + self.buy_or_sell
+        return self.user_fk.user_id.username + '_' + self.company_fk.company_name
 
 class CompanyBuyTable(models.Model):
     user_fk = models.ForeignKey(Profile, on_delete=models.CASCADE)

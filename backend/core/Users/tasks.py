@@ -80,7 +80,7 @@ def match_util(company_id):
                         buy_pointer += (fl == 0)
                         continue
                 # If company.share_price is lesser than sell_object price sell shares of the company.
-                elif (sell_pointer < len(sell_objects)) and company.share_price < sell_objects[sell_pointer].bid_price and buy_objects[buy_pointer] >= company.share_price:
+                elif (sell_pointer < len(sell_objects)) and company.share_price < sell_objects[sell_pointer].bid_price and buy_objects[buy_pointer].bid_price >= company.share_price:
                     
                     # Match buy bid to company.
                     fl = userCompanyTransaction(company, buy_objects[buy_pointer])

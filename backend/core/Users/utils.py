@@ -7,7 +7,7 @@ def checkUserhasMoney(user, money) -> bool:
     return False
 
 def checkForCompanyShares(company, no_of_shares_requested) -> bool:
-    if (company.remaining_no_of_shares >= no_of_shares_requested):
+    if (company.remaining_no_of_shares >= 0 and no_of_shares_requested > 0):
         return True
     return False
 
@@ -45,7 +45,9 @@ def userCompanyTransaction(company, buy_obj) -> int:
 
     # Update company share price.
     company.share_price = buy_obj.bid_price
+    print(company.share_price)
     company.share_price += int(min(buy_obj.no_of_shares, company.remaining_no_of_shares) * (buy_obj.bid_price - company.share_price) / 200)
+    print(company.share_price)
     company.save()
 
     user = Profile.objects.all().filter(pk=buy_obj.user_fk.pk).first()
@@ -101,7 +103,8 @@ def userTransaction(company, buy_obj, sell_obj) -> int:
     global_obj.save()
 
     # Update company share price
-    company.share_price -= sell_obj.bid_price
+    print(sell_obj.bid_price)
+    company.share_price = sell_obj.bid_price
     company.save()
 
     buy_user = Profile.objects.all().filter(pk=buy_obj.user_fk.pk).first()   # Selling bid user
