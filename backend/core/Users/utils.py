@@ -46,7 +46,7 @@ def userCompanyTransaction(company, buy_obj) -> int:
     # Update company share price.
     company.share_price = buy_obj.bid_price
     print(company.share_price)
-    company.share_price += int(min(buy_obj.no_of_shares, company.remaining_no_of_shares) * (buy_obj.bid_price - company.share_price) / 200)
+    company.share_price = company.share_price + int(min(buy_obj.no_of_shares, company.remaining_no_of_shares) * (buy_obj.bid_price - company.share_price) / 200)
     print(company.share_price)
     company.save()
 
@@ -103,7 +103,7 @@ def userTransaction(company, buy_obj, sell_obj) -> int:
     global_obj.save()
 
     # Update company share price
-    print(sell_obj.bid_price)
+    print("in user tran" + str(sell_obj.bid_price))
     company.share_price = sell_obj.bid_price
     company.save()
 
