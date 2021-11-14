@@ -94,3 +94,36 @@ def match_util(company_id):
                 sell_pointer += (fl == 1 or fl == 0)
             else:
                 break
+
+@shared_task
+def processQueriesTask():
+    # Iterate for all companies and process the buy sell objects for each company.
+    companies = Company.objects.all()
+    buy_objects = CompanyBuyTable.objects.all()
+    sell_objects = CompanySellTable.objects.all()
+    for company in companies:
+        buy_pointer = 0   # Buy object iterator
+        sell_pointer = 0  # Sell object iterator
+        if CompanyBuyTable.objects.all() is not None:
+            while buy_pointer < len(buy_objects) and (sell_pointer < sell_objects or company.remaining_no_of_shares > 0):
+                if company.remaining_no_of_shares > 0:
+                    # Company has shares remaining
+                    if not sell_pointer < len(sell_objects):
+                        # If sell table does not have any objects, check for company shares.
+                        fl = userCompanyTransaction(company, buy_objects[buy_pointer])
+                        buy_pointer += (fl == 0)
+                        continue
+                    elif sell_pointer < len(sell_objects) and company.share_price < buy_objects[buy_pointer].bid_price and sell_objects[sell_pointer >= company.share_price]:
+                        # If shares are left in table, but company share price is less than sell table, sell shares of the company.
+                        fl = userCompanyTransaction(company, buy_objects[buy_pointer])
+                        buy_pointer += (fl == 0)
+                        continue
+                if sell_pointer < len(sell_objects) and sell_objects and buy_objects[buy_pointer] >= sell_objects[sell_pointer]:
+                    # Match buy object with sell object.
+                    fl = userTransaction(company, buy_objects[buy_pointer], sell_objects[sell_pointer])
+                    buy_pointer += (fl == -1 or fl == 0)
+                    sell_pointer += (fl == 1 or fl == 0)
+                else:
+                    break
+    
+    # Delete buy/sell objects if not matched after a specific time, and return money to user.
