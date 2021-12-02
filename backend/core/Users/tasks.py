@@ -1,10 +1,12 @@
+from datetime import datetime
 from celery import shared_task
 from celery.utils.log import get_task_logger
 import pandas as pd
+import pytz
 from .models import *
 from .utils import *
 
-# news = pd.read_csv('news.csv')
+news = pd.read_csv('Users/news.csv')
 
 logger = get_task_logger(__name__)
 
@@ -13,47 +15,44 @@ def send_notifiction():
     logger.info("Yello!")
 
 
-
-# @shared_task()
-# def add_news():
-#     g_obj = Globals.objects.all().first()
-#     if g_obj.market_on and g_obj.start_news:
-#         global news
-#         new_news = news.iloc[g_obj.NewsCounter, :]
-#         title = new_news.title
-#         g_obj.LiveText = new_news.title
-#         description = new_news.description
-#         g_obj.NewsCounter += 1
-#         g_obj.save()
+@shared_task()
+def add_news():
+    global_ = Globals.objects.all().first()
+    if global_.market_on and global_.start_news:
+        global news
+        new_news = news.iloc[global_.news_counter%len(news['title']), :]
+        title = new_news.title
+        description = new_news.description
+        global_.news_counter += 1
+        global_.save()
             
-#         News.objects.create(title=title, description=description)
-#     else:
-#         return
+        News.objects.create(news_title=title, description=description)
+    else:
+        return
 
 
 @shared_task()
 def spread_task():
-    profiles = {}
-    total_transaction = 0
+    global_ = Globals.objects.all().first()
+    if global_.market_on :
+        profiles = {}
+        total_transaction = 0
+        for p in Profile.objects.all():
+            profiles[p] = 0
 
-    g_obj = Globals.objects.all().first()
+        for u in UserHistory.objects.all():
+            value = u.no_of_shares * u.bid_price
+            total_transaction += value
 
-    for p in Profile.objects.all():
-        profiles[p] = 0
+            profiles[u.profile] += value
 
-    for u in UserHistory.objects.all():
-        value = u.no_of_shares * u.bid_price
-        total_transaction += value
+        for p in Profile.objects.all():
+            spreadRatio = profiles[p] / total_transaction
+            p.cash += (spreadRatio * global_.spread)
+            p.save()
 
-        profiles[u.profile] += value
-
-    for p in Profile.objects.all():
-        spreadRatio = profiles[p] / total_transaction
-        p.cash += (spreadRatio * g_obj.spread)
-        p.save()
-
-    g_obj.spred = 0
-    g_obj.save()
+        global_.spred = 0
+        global_.save()
 
 @shared_task
 def match_util(company_id):
@@ -127,3 +126,32 @@ def processQueriesTask():
                     break
     
     # Delete buy/sell objects if not matched after a specific time, and return money to user.
+    
+    tz = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.now().astimezone(tz)
+    while (buy_pointer < len(buy_objects)):
+        if (current_time - buy_objects[buy_pointer].transaction_time).seconds >= 150:
+            userRevoke(buy_objects[buy_pointer], True)
+            buy_objects.get(pk = buy_objects[buy_pointer].pk).delete()
+        buy_pointer += 1
+
+    while (sell_pointer < len(sell_objects)):
+        if (current_time - sell_objects[sell_pointer].transaction_time).seconds >= 150:
+            userRevoke(sell_objects[sell_pointer], False)
+            sell_objects.get(pk = sell_objects[sell_pointer].pk).delete()
+        sell_pointer += 1
+
+@shared_task
+def updateNetWorth():
+    get_users = Profile.objects.all()
+    for user in get_users:
+        user.net_worth = 0
+        user.save()
+        get_user_shares = UserShare.objects.filter(user_fk = user)
+        for user_share in get_user_shares:
+            no_of_shares = user_share.no_of_shares
+            company = Company.objects.filter(pk = user_share.company_fk.pk).first()
+            user.net_worth += (0.6 * company.share_price * no_of_shares)
+        user.net_worth += 0.4 * user.cash
+        user.save()
+    

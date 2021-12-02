@@ -69,3 +69,9 @@ class UserStatsSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "user_company_shares" : {"required": True, "read_only": False}
         }
+
+class LeaderBoardSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Profile
+        exclude = ["user_id", "rank"]

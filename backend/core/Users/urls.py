@@ -22,7 +22,8 @@ urlpatterns = [
     path('sell/', SellView.as_view(), name='sell-view'),
     path('get_token/', TokenObtainPairView.as_view(), name='get-token'),
     path('get_refresh/', TokenRefreshView.as_view(), name='get-refresh'),
-    path('user_stats/', GetUserStatsView.as_view(), name="user-portfolio")
+    path('user_stats/', GetUserStatsView.as_view(), name="user-portfolio"),
+    path('live_text/',getLiveText , name="live-text"),
 ]
 
 # DRF-YASG

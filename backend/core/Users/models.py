@@ -19,7 +19,7 @@ class Profile(models.Model):
     net_worth = models.IntegerField(default=0) # 60 % share valuation 40 % cash valuation
     
     def __str__(self) -> str:
-        return self.user_id.username + "'s Profile" 
+        return self.user_id.username + "'s Profile"
 
 class Company(models.Model):
     company_name = models.CharField(max_length=128)
