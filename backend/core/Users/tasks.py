@@ -44,14 +44,14 @@ def spread_task():
             value = u.no_of_shares * u.bid_price
             total_transaction += value
 
-            profiles[u.profile] += value
+            profiles[u.user_fk] += value
 
         for p in Profile.objects.all():
             spreadRatio = profiles[p] / total_transaction
             p.cash += (spreadRatio * global_.spread)
             p.save()
 
-        global_.spred = 0
+        global_.spread = 0
         global_.save()
 
 @shared_task
