@@ -60,7 +60,7 @@ class SellViewSerializer(serializers.ModelSerializer):
 class GetAllNewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = News
-        fields = ["news_title", "description"]
+        fields = ["news_title", "description", "time"]
 
 class UserStatsSerializer(serializers.ModelSerializer):
     class Meta:
