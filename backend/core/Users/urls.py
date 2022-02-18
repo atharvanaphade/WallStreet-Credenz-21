@@ -19,6 +19,7 @@ urlpatterns = [
     path('leaderboard/', GetLeaderBoard, name="leaderboard"),
     path('company', CompanygetListView.as_view(), name="company"),
     path('company/<int:pk>', CompanyUpdateDestroyView.as_view(), name="edit-company"),
+    path('get_company/<int:pk>', GetCompanyView.as_view(), name="get-company"),
     path('buy/', BuyView.as_view(), name='buy-view'),
     path('sell/', SellView.as_view(), name='sell-view'),
     path('get_token/', TokenObtainPairView.as_view(), name='get-token'),

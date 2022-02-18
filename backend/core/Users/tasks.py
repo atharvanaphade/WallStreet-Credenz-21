@@ -100,11 +100,13 @@ def processQueriesTask():
     companies = Company.objects.all()
     buy_objects = CompanyBuyTable.objects.all()
     sell_objects = CompanySellTable.objects.all()
+    buy_pointer = 0
+    sell_pointer = 0
     for company in companies:
         buy_pointer = 0   # Buy object iterator
         sell_pointer = 0  # Sell object iterator
         if CompanyBuyTable.objects.all() is not None:
-            while buy_pointer < len(buy_objects) and (sell_pointer < sell_objects or company.remaining_no_of_shares > 0):
+            while buy_pointer < len(buy_objects) and (sell_pointer < len(sell_objects) or company.remaining_no_of_shares > 0):
                 if company.remaining_no_of_shares > 0:
                     # Company has shares remaining
                     if not sell_pointer < len(sell_objects):
@@ -117,7 +119,7 @@ def processQueriesTask():
                         fl = userCompanyTransaction(company, buy_objects[buy_pointer])
                         buy_pointer += (fl == 0)
                         continue
-                if sell_pointer < len(sell_objects) and sell_objects and buy_objects[buy_pointer] >= sell_objects[sell_pointer]:
+                if sell_pointer < len(sell_objects) and sell_objects and buy_objects[buy_pointer].bid_price >= sell_objects[sell_pointer].bid_price:
                     # Match buy object with sell object.
                     fl = userTransaction(company, buy_objects[buy_pointer], sell_objects[sell_pointer])
                     buy_pointer += (fl == -1 or fl == 0)

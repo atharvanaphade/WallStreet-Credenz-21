@@ -199,7 +199,7 @@ def userTransaction(company, buy_obj, sell_obj) -> int:
 def userRevoke(tableEntry, buySell):
     # Return money to user of buy objet stays too long in the table.
     user = tableEntry.user_fk
-    company = Company.objects.get(pk = tableEntry.company)
+    company = Company.objects.get(pk = tableEntry.company_fk.pk)
     bid_price = tableEntry.bid_price
     no_of_shares = tableEntry.no_of_shares
 
@@ -207,8 +207,8 @@ def userRevoke(tableEntry, buySell):
         alterMoney(user, bid_price * no_of_shares)
     else:
         try:
-            u = UserShare.objects.get(company=company, user_fk=user)
+            u = UserShare.objects.get(company_fk=company, user_fk=user)
             u.no_of_shares += no_of_shares
             u.save()
         except:
-            UserShare.objects.create(user_fk=user, company=company, no_of_shares=no_of_shares)
+            UserShare.objects.create(user_fk=user, company_fk=company, no_of_shares=no_of_shares)
