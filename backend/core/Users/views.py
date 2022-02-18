@@ -241,6 +241,7 @@ class GetUserStatsView(generics.ListCreateAPIView):
             user_share_hist = UserHistory.objects.filter(
                 user_fk=Profile.objects.filter(user_id=request.user).first()
             )
+            print(user_share_hist)
 
             query_dict["no_of_shares"] = user.no_of_shares
             query_dict["cash"] = user.cash
@@ -260,7 +261,7 @@ class GetUserStatsView(generics.ListCreateAPIView):
             for trans in user_share_hist:
                 temp_dict={}
                 test = "Buy"
-                if(trans['buy_or_sell']):
+                if(trans.buy_or_sell):
                     test="Sell"
 
                 temp_dict = {
