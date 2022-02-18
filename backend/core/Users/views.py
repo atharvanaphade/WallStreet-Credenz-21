@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User
 from rest_framework.response import Response
 from .serializers import *
@@ -42,18 +42,44 @@ class CompanyCreateListView(generics.ListCreateAPIView):
     permission_classes = (IsAdminUser, )
 
 
+class CompanygetListView(generics.ListCreateAPIView):
+    queryset = Company.objects.all()
+    serializer_class = CompanySerializer
+    permission_classes = (AllowAny, )
+
 class CompanyUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     permission_classes = (IsAdminUser, )
 
+class GetCompanyView(generics.RetrieveAPIView):
+    queryset = Company.objects.all()
+    serializer_class = CompanySerializer
+    permission_classes = (AllowAny, )
 
 class GetAllNewsView(generics.ListCreateAPIView):
     serializer_class = GetAllNewsSerializer
     permission_classes = (AllowAny, )
-    queryset = News.objects.all()
+    queryset = News.objects.all().order_by('-time')
 
-class GetLeaderBoard(pagination.PageNumberPagination):
+#class GetLeaderBoard(pagination.PageNumberPagination):
+#    page_size = 2
+#    page_size_query_param = 'page_size'
+#    max_page_size = 50
+
+@api_view(['GET'])
+def GetLeaderBoard(request):
+    all_profs = Profile.objects.all().order_by('-net_worth')
+    ret_dict = {}
+    ret_dict['persons'] = []
+    for item in all_profs:
+        temp={}
+        temp['name'] = item.user_id.get_username()
+        temp['net_worth'] = item.net_worth
+        ret_dict['persons'].append(temp)
+    return Response(ret_dict, status=200)
+    serializer_class = LeaderBoardSerializer
+    permission_classes = (AllowAny, )
     page_size = 2
     page_size_query_param = 'page_size'
     max_page_size = 50
@@ -66,9 +92,9 @@ def getLiveText(request):
 
 class BuyView(generics.GenericAPIView):
     serializer_class = CompanySerializer
-    permission_classes = (IsAuthenticated, )
     queryset = Company.objects.all()
-
+    
+    @permission_classes((AllowAny, ))
     def get(self, request, *args, **kwargs):
         global_obj = Globals.objects.all().first()
         ret_dict = {}
@@ -77,6 +103,7 @@ class BuyView(generics.GenericAPIView):
             ret_dict['companies'] = []
             for company in companies:
                 temp = {}
+                temp['id'] = company.id
                 temp['company_name'] = company.company_name
                 temp['short_name'] = company.short_name
                 temp['share_price'] = company.share_price
@@ -87,7 +114,8 @@ class BuyView(generics.GenericAPIView):
             return Response(ret_dict, status=200)
         ret_dict['status'] = 'MKT_CLOSED'
         return Response(ret_dict, status=200)
-
+    
+    @permission_classes((IsAuthenticated, ))
     def post(self, request, *args, **kwargs):
         global_obj = Globals.objects.all().first()
         ret_dict = {}
@@ -138,7 +166,7 @@ class SellView(generics.GenericAPIView):
             ret_dict['share_list'] = []
             for obj in user_share_list:
                 temp = {}
-
+                temp['id'] = obj.company_fk.pk
                 temp['company_name'] = obj.company_fk.company_name
                 temp['short_name'] = obj.company_fk.short_name
                 temp['share_price'] = obj.company_fk.share_price
@@ -207,17 +235,60 @@ class GetUserStatsView(generics.ListCreateAPIView):
             user_share_qs = UserShare.objects.filter(
                 user_fk=Profile.objects.filter(user_id=request.user).first())
             user = Profile.objects.filter(user_id=request.user).first()
+            user_share_hist = UserHistory.objects.filter(
+                user_fk=Profile.objects.filter(user_id=request.user).first()
+            )
             query_dict["no_of_shares"] = user.no_of_shares
             query_dict["cash"] = user.cash
             query_dict["net_worth"] = user.net_worth
             query_dict["company_user_share_list"] = []
+            query_dict['Completed_trans']=[]
+            query_dict['pending_trans']=[]
             for user_share in user_share_qs:
                 temp_dict = {}
                 company = user_share.company_fk
-                temp_dict = {"company_user_share_list": company.company_name,
-                             "no_of_shares": company.no_of_shares
+                temp_dict = {"company_name": company.company_name,
+                             "no_of_shares": user_share.no_of_shares
                              }
                 query_dict["company_user_share_list"].append(temp_dict)
+
+            for trans in user_share_hist:
+                temp_dict={}
+                test = "Buy"
+                if(trans.buy_or_sell):
+                    test="Sell"
+
+                temp_dict = {
+                    'Company' : trans.company_fk.company_name,
+                    'Type' : test,
+                    'no_of_shares' : trans.no_of_shares,
+                    'bid_price' : trans.bid_price
+
+                }
+                query_dict["Completed_trans"].append(temp_dict)
+            
+            profile = Profile.objects.get(user_id=request.user)
+            sell_objects = CompanySellTable.objects.filter(user_fk=profile)
+            buy_objects = CompanyBuyTable.objects.filter(user_fk=profile)
+
+            for buy in buy_objects:
+                temp = {
+                    "Company": buy.company_fk.company_name,
+                    "Type": "Buy",
+                    "no_of_shares": buy.no_of_shares,
+                    "bid_price": buy.bid_price
+                }
+                query_dict['pending_trans'].append(temp)
+
+            for sell in sell_objects:
+                temp = {
+                    "Company": sell.company_fk.company_name,
+                    "Type": "Sell",
+                    "no_of_shares": sell.no_of_shares,
+                    "bid_price": sell.bid_price
+                }
+                query_dict['pending_trans'].append(temp)
+
             query_dict["status"] = "Successfully fetched user data..!!"
             return Response(query_dict, status=200)
         except Exception as e:

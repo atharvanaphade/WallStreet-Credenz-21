@@ -43,7 +43,7 @@ class CompanySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Company
-        exclude = ["remaining_no_of_shares","total_no_shares", "share_price", "short_name"]
+        exclude = ["total_no_shares", "short_name"]
         # fields = "__all__"
 
 
@@ -60,7 +60,7 @@ class SellViewSerializer(serializers.ModelSerializer):
 class GetAllNewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = News
-        fields = ["news_title", "description"]
+        fields = ["news_title", "description", "time"]
 
 class UserStatsSerializer(serializers.ModelSerializer):
     class Meta:
