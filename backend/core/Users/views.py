@@ -1,3 +1,4 @@
+from tempfile import tempdir
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
@@ -41,6 +42,11 @@ class CompanyCreateListView(generics.ListCreateAPIView):
     serializer_class = CompanySerializer
     permission_classes = (IsAdminUser, )
 
+class CompanygetListView(generics.ListCreateAPIView):
+    queryset = Company.objects.all()
+    serializer_class = CompanySerializer
+    permission_classes = (AllowAny, )
+
 
 class CompanygetListView(generics.ListCreateAPIView):
     queryset = Company.objects.all()
@@ -61,11 +67,6 @@ class GetAllNewsView(generics.ListCreateAPIView):
     serializer_class = GetAllNewsSerializer
     permission_classes = (AllowAny, )
     queryset = News.objects.all().order_by('-time')
-
-#class GetLeaderBoard(pagination.PageNumberPagination):
-#    page_size = 2
-#    page_size_query_param = 'page_size'
-#    max_page_size = 50
 
 @api_view(['GET'])
 def GetLeaderBoard(request):
@@ -238,12 +239,14 @@ class GetUserStatsView(generics.ListCreateAPIView):
             user_share_hist = UserHistory.objects.filter(
                 user_fk=Profile.objects.filter(user_id=request.user).first()
             )
+
             query_dict["no_of_shares"] = user.no_of_shares
             query_dict["cash"] = user.cash
             query_dict["net_worth"] = user.net_worth
             query_dict["company_user_share_list"] = []
             query_dict['Completed_trans']=[]
             query_dict['pending_trans']=[]
+
             for user_share in user_share_qs:
                 temp_dict = {}
                 company = user_share.company_fk
@@ -251,11 +254,12 @@ class GetUserStatsView(generics.ListCreateAPIView):
                              "no_of_shares": user_share.no_of_shares
                              }
                 query_dict["company_user_share_list"].append(temp_dict)
-
+            
             for trans in user_share_hist:
                 temp_dict={}
                 test = "Buy"
-                if(trans.buy_or_sell):
+                if(trans['buy_or_sell']):
+
                     test="Sell"
 
                 temp_dict = {
@@ -288,7 +292,7 @@ class GetUserStatsView(generics.ListCreateAPIView):
                     "bid_price": sell.bid_price
                 }
                 query_dict['pending_trans'].append(temp)
-
+                
             query_dict["status"] = "Successfully fetched user data..!!"
             return Response(query_dict, status=200)
         except Exception as e:
