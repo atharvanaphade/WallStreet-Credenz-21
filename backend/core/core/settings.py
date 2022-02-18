@@ -28,6 +28,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1', '[::1]']
 
+CORS_ORIGIN_ALLOW_ALL = True
+
+MEDIA_URL = '/media/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static'
 
 # Application definition
 
@@ -44,6 +49,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_yasg',
     'Users',
+    'corsheaders',
 ]
 
 REST_FRAMEWORK = { 
@@ -75,6 +81,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
