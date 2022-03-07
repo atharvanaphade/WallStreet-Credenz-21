@@ -181,3 +181,7 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
+
+STATIC_ROOT = BASE_DIR + '/static'
+STATIC_URL = '/static/'
+STATIC_DIRS = [ f"{BASE_DIR}/static" ]

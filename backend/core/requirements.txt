@@ -10,7 +10,7 @@ Django==3.2.8
 django-celery-beat==2.2.1
 django-timezone-field==4.2.1
 djangorestframework==3.12.4
-djangorestframework-simplejwt==4.6.0
+djangorestframework-simplejwt
 dnspython==2.1.0
 drf-yasg==1.20.0
 eventlet==0.32.0
