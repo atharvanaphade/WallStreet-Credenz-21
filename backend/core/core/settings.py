@@ -182,6 +182,6 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
-STATIC_ROOT = BASE_DIR + '/static'
+STATIC_ROOT = BASE_DIR / '/static'
 STATIC_URL = '/static/'
 STATIC_DIRS = [ f"{BASE_DIR}/static" ]
