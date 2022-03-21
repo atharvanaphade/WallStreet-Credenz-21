@@ -204,7 +204,7 @@ def userRevoke(tableEntry, buySell):
     no_of_shares = tableEntry.no_of_shares
 
     if buySell:
-        alterMoney(user, bid_price * no_of_shares)
+        alterMoney(user, bid_price * no_of_shares, no_of_shares)
     else:
         try:
             u = UserShare.objects.get(company_fk=company, user_fk=user)

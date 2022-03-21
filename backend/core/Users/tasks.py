@@ -157,3 +157,11 @@ def updateNetWorth():
         user.net_worth += 0.4 * user.cash
         user.save()
     
+    all_profs = Profile.objects.all().order_by('-net_worth')
+    i=1
+    for item in all_profs:
+        item.rank = i
+        item.save()
+        i+=1
+        
+

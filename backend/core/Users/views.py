@@ -243,6 +243,7 @@ class GetUserStatsView(generics.ListCreateAPIView):
             query_dict["no_of_shares"] = user.no_of_shares
             query_dict["cash"] = user.cash
             query_dict["net_worth"] = user.net_worth
+            query_dict["rank"]=user.rank
             query_dict["company_user_share_list"] = []
             query_dict['Completed_trans']=[]
             query_dict['pending_trans']=[]
@@ -257,10 +258,10 @@ class GetUserStatsView(generics.ListCreateAPIView):
             
             for trans in user_share_hist:
                 temp_dict={}
-                test = "Buy"
-                if(trans['buy_or_sell']):
+                test = "Sell"
+                if(trans.buy_or_sell):
 
-                    test="Sell"
+                    test="Buy"
 
                 temp_dict = {
                     'Company' : trans.company_fk.company_name,
