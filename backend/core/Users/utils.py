@@ -13,13 +13,21 @@ def checkForCompanyShares(company, no_of_shares_requested) -> bool:
 
 def alterMoney(user, money, no_of_shares) -> None:
     profile = Profile.objects.filter(user_id=user).first()
-    profile.cash -= no_of_shares * money
+    amount = (money * no_of_shares)
+    charge = int(0.01 * amount)
+    net = amount + charge
+    profile.cash -= net
     profile.save()
 
 def alterSellMoney(user, money, no_of_shares) -> None:
     # profile = Profile.objects.filter(user_fk=user).first()
-    user.cash += money * no_of_shares
+    amount = (money * no_of_shares)
+    charge = int(0.01 * amount)
+    net = amount - charge
+    user.cash += net
     user.save()
+  
+
     
 def checkIsBidValid(bid_price, company) -> bool:
     global_obj = Globals.objects.all().first()

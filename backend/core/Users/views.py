@@ -127,7 +127,7 @@ class BuyView(generics.GenericAPIView):
                 bid_price = int(request.data['bid_price'])
                 company_obj = Company.objects.filter(
                     company_name=company_name).first()
-                if (checkUserhasMoney(request.user, int(bid_price)) and
+                if (checkUserhasMoney(request.user, int(bid_price*bid_shares)) and
                     checkForCompanyShares(company_obj, int(bid_shares)) and
                         checkIsBidValid(int(bid_price), company_obj)):
                     addObjectToBuyTable(request.user, company_obj,

@@ -59,8 +59,8 @@ def match_util(company_id):
     company = Company.objects.all().filter(pk=company_id).first()
 
     # Get buy and sell table objects in sorted order.
-    buy_objects = CompanyBuyTable.objects.all().order_by('-bid_price', 'transaction_time')
-    sell_objects = CompanySellTable.objects.all().order_by('bid_price', 'transaction_time')
+    buy_objects = CompanyBuyTable.objects.all().filter(company_fk=company_id).order_by('-bid_price', 'transaction_time')
+    sell_objects = CompanySellTable.objects.all().filter(company_fk=company_id).order_by('bid_price', 'transaction_time')
 
     # If buy objects exists.
     if buy_objects is not None:
@@ -94,18 +94,18 @@ def match_util(company_id):
             else:
                 break
 
+
 @shared_task
 def processQueriesTask():
     # Iterate for all companies and process the buy sell objects for each company.
     companies = Company.objects.all()
-    buy_objects = CompanyBuyTable.objects.all()
-    sell_objects = CompanySellTable.objects.all()
-    buy_pointer = 0
-    sell_pointer = 0
+    
     for company in companies:
+        buy_objects = CompanyBuyTable.objects.all().filter(company_fk=company.id).order_by('-bid_price','transaction_time')
+        sell_objects = CompanySellTable.objects.all().filter(company_fk=company.id).order_bu('bid_price','transaction_time')
         buy_pointer = 0   # Buy object iterator
         sell_pointer = 0  # Sell object iterator
-        if CompanyBuyTable.objects.all() is not None:
+        if buy_objects is not None:
             while buy_pointer < len(buy_objects) and (sell_pointer < len(sell_objects) or company.remaining_no_of_shares > 0):
                 if company.remaining_no_of_shares > 0:
                     # Company has shares remaining
@@ -129,19 +129,20 @@ def processQueriesTask():
     
     # Delete buy/sell objects if not matched after a specific time, and return money to user.
     
-    tz = pytz.timezone('Asia/Kolkata')
-    current_time = datetime.now().astimezone(tz)
-    while (buy_pointer < len(buy_objects)):
-        if (current_time - buy_objects[buy_pointer].transaction_time).seconds >= 150:
-            userRevoke(buy_objects[buy_pointer], True)
-            buy_objects.get(pk = buy_objects[buy_pointer].pk).delete()
-        buy_pointer += 1
+        tz = pytz.timezone('Asia/Kolkata')
+        current_time = datetime.now().astimezone(tz)
+        while (buy_pointer < len(buy_objects)):
+            if (current_time - buy_objects[buy_pointer].transaction_time).seconds >= 150:
+                userRevoke(buy_objects[buy_pointer], True)
+                buy_objects.get(pk = buy_objects[buy_pointer].pk).delete()
+            buy_pointer += 1
 
-    while (sell_pointer < len(sell_objects)):
-        if (current_time - sell_objects[sell_pointer].transaction_time).seconds >= 150:
-            userRevoke(sell_objects[sell_pointer], False)
-            sell_objects.get(pk = sell_objects[sell_pointer].pk).delete()
-        sell_pointer += 1
+        while (sell_pointer < len(sell_objects)):
+            if (current_time - sell_objects[sell_pointer].transaction_time).seconds >= 150:
+                userRevoke(sell_objects[sell_pointer], False)
+                sell_objects.get(pk = sell_objects[sell_pointer].pk).delete()
+            sell_pointer += 1
+
 
 @shared_task
 def updateNetWorth():
